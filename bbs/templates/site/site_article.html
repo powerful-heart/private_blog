@@ -1,0 +1,165 @@
+{% extends 'site/site_base.html' %}
+
+{% block link %}
+    <link rel="stylesheet" href="/static/css/article.css">
+{% endblock %}
+
+{% block content %}
+    <h3 class="text-center">{{ article.title }}</h3>
+    <hr>
+    <div>{{ article.content | safe }}</div>
+    <hr>
+    <div class="flag">
+        <i  hidden class="is_login" style="color: black; font-size: 20px">{{ is_up }}</i>
+        {% if is_up.is_up == True  %}
+            <i class="up glyphicon glyphicon-thumbs-up active">赞({{ article.up_num }})</i>
+            <i class="down glyphicon glyphicon-thumbs-down">踩({{ article.down_num }})</i>
+        {% elif  is_up.is_up == False %}
+            <i class="up glyphicon glyphicon-thumbs-up">赞({{ article.up_num }})</i>
+            <i class="down glyphicon glyphicon-thumbs-down active">踩({{ article.down_num }})</i>
+        {% else %}
+            <i class="up glyphicon glyphicon-thumbs-up">赞({{ article.up_num }})</i>
+            <i class="down glyphicon glyphicon-thumbs-down">踩({{ article.down_num }})</i>
+        {% endif %}
+    </div>
+{#    评论#}
+    <div>
+    {% if not request.user.is_authenticated %}
+        <h3>
+            <a href="/login/">登录后查看评论</a>
+        </h3>
+    {% else %}
+        <h3>
+            评论列表
+        </h3>
+        <ul class="list-group">
+            {% for comment in comment_list %}
+                <li class="list-group-item">
+                    <span>
+                        <a name="floor" id="floor"></a>
+                        <a href="#floor">#{{ forloop.counter }}楼</a>
+                    </span>
+                    <span>
+                        {{ comment.create_time | date:'Y-m-d' }}
+                    </span>
+                    <span>
+                        <a href="/{{ comment.user.username }}/">{{ comment.user.username }}</a>
+                    </span>
+                    <span class="pull-right">
+                        <a username="{{ comment.user.username }}" parent_id="{{ comment.id }}" class="back_comment" href="javascript:void(0)">回复</a>
+                    </span>
+                    {% if comment.parent %}
+                        <p>
+                            @{{ comment.parent.user.username }}
+                        </p>
+                    {% endif %}
+                    <p>
+                        {{ comment.content }}
+                    </p>
+                </li>
+            {% endfor %}
+        </ul>
+        <h3>发表评论</h3>
+        <p>
+            昵称:<input type="text" disabled value="{{ request.user.username }}">
+        </p>
+        <p>
+            评论内容:
+        </p>
+        <p>
+            <textarea class="comment_content" cols="60" rows="10"></textarea>
+        </p>
+        <p>
+            <input type="button" id="submit" class="btn btn-primary" value="评论">
+        </p>
+    {% endif %}
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    {#点赞或点踩#}
+    <script>
+    $(".up").click(function () {
+        is_login = $('.is_login').text() ? true : false
+
+        if (!is_login) {
+            alert("请先登录!")
+        }else {
+            if (!$(this).hasClass('active')) {
+                _this = this;
+                $.ajax({
+                    url: '/upordown/',
+                    type: 'get',
+                    data: {
+                        article_id: {{ article_id  }},
+                        is_up: true,
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        data.status == 1 && $(_this).addClass('active').next().removeClass('active')
+                        {#i.text(Number(i.text())+1)#}
+                    }
+                })
+            }
+        }
+    })
+
+    $('.down').click(function () {
+        is_login = $('.is_login').text() ? true : false;
+        if (!is_login) {
+            alert('请先登录 !')
+        }else{
+            if (!$(this).hasClass('active')){
+                _this = this;
+                $.ajax({
+                    url: '/upordown/',
+                    type: 'get',
+                    data: {
+                        article_id: {{ article.id }},
+                        is_up : false,
+                    },
+                    success:function (data) {
+                        console.log(data);
+                        data.status == 1 && $(_this).addClass('active').prev().removeClass('active');
+                    }
+                })
+            }
+        }
+
+    })
+    </script>
+{#    评论#}
+    <script>
+        var parent_id = '';
+        {#回复#}
+        $('.back_comment').click(function () {
+            var username = $(this).attr('username');
+            parent_id = $(this).attr('parent_id');
+            $(".comment_content").text('@' + username + '\n')
+        });
+        {#评论脚本#}
+        $("#submit").click(function () {
+            var content = $('.comment_content').val();
+            var index = content.indexOf('\n');
+            content = content.slice(index + 1);
+
+            if (content) {
+                $.ajax({
+                    url: '/add_comment/',
+                    type: 'post',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        article_id: {{ article.id }},
+                        content: content,
+                        parent_id: parent_id,
+                    },
+                    success: function (data) {
+                        location.reload()
+                    }
+                })
+            }
+
+        })
+    </script>
+{% endblock %}

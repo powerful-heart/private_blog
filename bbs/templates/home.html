@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>博客主页</title>
+    <link rel="stylesheet" href="/static/bs-3.3.7/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/font-awesome-4.7.0/css/font-awesome.css">
+</head>
+<body>
+<div>
+    <div class="head">
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                            data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">博客园</a>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li class="active"><a href="">文章 <span class="sr-only">(current)</span></a></li>
+                        <li><a href="#">随笔</a></li>
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        {% if request.user.is_authenticated %}
+                            <li><a href="/{{ request.user.username }}/">{{ request.user.username }}</a></li>
+                            <li class="dropdown">
+                                <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                                   aria-haspopup="true" aria-expanded="false">个人中心 <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#">修改密码</a></li>
+                                    <li><a href="#">修改头像</a></li>
+                                    <li role="separator" class="divider"></li>
+                                    <li><a href="/logout/">退出</a></li>
+                                </ul>
+                            </li>
+                        {% else %}
+                            <li><a href="/login/">登陆</a></li>
+                            <li><a href="/register/">注册</a></li>
+                        {% endif %}
+                    </ul>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2">
+                <div class="panel panel-primary">
+                    <div class="panel-heading" style="text-align: center;font-size: 20px">百度</div>
+                    <div class="panel-body">
+                        <a href="http://www.baidu.com">百度搜索</a>
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading" style="text-align: center;font-size: 20px">谷歌</div>
+                    <div class="panel-body">
+                        <a href="http://www.google.com">谷歌搜索</a>
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading" style="text-align: center;font-size: 20px">淘宝</div>
+                    <div class="panel-body">
+                        <a href="http://www.taobao.com">买买买</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                {% for article in current_page %}
+                    <h4><a href="/{{ article.blog.user.username }}/article/{{ article.id }}.html">{{ article.title }}</a></h4>
+                    <ul class="media-list">
+                        <li class="media">
+                            <div class="media-left">
+                                <a href="/{{ article.blog.user.username }}/">
+                                    <img class="media-object" src="/media/{{ article.blog.user.avatar }}" alt="" width="60"
+                                         height="60">
+                                </a>
+                            </div>
+                            <div class="media-body">
+                                {{ article.desc }}
+                            </div>
+                        </li>
+                    </ul>
+                    <div>
+                        <span><a href="/{{ article.blog.user.username }}/">{{ article.blog.user.username }}</a></span>
+                        <span style="margin-left: 10px">发布于{{ article.create_time }}</span>
+                        <span class="fa fa-commenting-o " aria-hidden="true" style="margin-left: 10px">评论({{ article.comment_num }})</span>
+                        <span class="glyphicon glyphicon-thumbs-up" style="margin-left: 10px">点赞({{ article.up_num }})</span>
+                        <hr>
+                    </div>
+                {% endfor %}
+                <nav aria-label="Page" style="text-align: center">
+                    <ul class="pagination">
+                        <!-- 上一页 -->
+                        {% if current_page.has_previous %}
+                            <li class="previous"><a href="{% url 'home' %}?page={{ current_num|add:-1 }}">上一页</a></li>
+                        {% else %}
+                            <li class="previous disabled"><a href="#">上一页</a></li>
+                        {% endif %}
+
+                        {% if num_pages < 10 %}
+                            {% for num in page_range %}
+                                {% if current_num == num %}
+                                    <li class="active">
+                                        {% else %}
+                                    <li>
+                                {% endif %}
+                            <a href="{% url 'home' %}?page={{ num }}">{{ num }}</a></li>
+                            {% endfor %}
+                        {% else %}
+                            {% if current_num == 1 %}
+                                <li class="active">
+                                    {% else %}
+                                <li>
+                            {% endif %}
+                        <a href="{% url 'home' %}?page=1">1</a></li>
+                            <li><a href="javascript:void(0)">...</a></li>
+                            <!-- 中间三页页码 -->
+                            {% for num in page_range %}
+                                {% if current_num == num %}
+                                    <li class="active">
+                                        {% else %}
+                                    <li>
+                                {% endif %}
+                            <a href="{% url 'home' %}?page={{ num }}">{{ num }}</a></li>
+                            {% endfor %}
+                            <li><a href="javascript:void(0)">...</a></li>
+                            <!-- 最后一页页码 -->
+                            {% if current_num == num_pages %}
+                                <li class="active">
+                                    {% else %}
+                                <li>
+                            {% endif %}
+                        <a href="{% url 'home' %}?page={{ num_pages }}">{{ num_pages }}</a></li>
+                        {% endif %}
+                        <li>
+                            {% if current_num < num_pages %}
+                                <a href="{% url 'home' %}?page={{ current_num|add:1 }}" aria-label="Next">
+                            {% else %}
+                                <a href="javascript:void(0)" aria-label="Next">
+                            {% endif %}
+                            <span aria-hidden="true">下一页</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+            </div>
+            <div class="col-md-2">
+                <div class="panel panel-success">
+                    <div class="panel-heading" style="text-align: center;font-size: 20px">百度</div>
+                    <div class="panel-body">
+                        <a href="http://www.baidu.com">百度搜索</a>
+                    </div>
+                </div>
+                <div class="panel panel-success">
+                    <div class="panel-heading" style="text-align: center;font-size: 20px">谷歌</div>
+                    <div class="panel-body">
+                        <a href="http://www.google.com">谷歌搜索</a>
+                    </div>
+                </div>
+                <div class="panel panel-success">
+                    <div class="panel-heading" style="text-align: center;font-size: 20px">淘宝</div>
+                    <div class="panel-body">
+                        <a href="http://www.taobao.com">买买买</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+<script src="/static/bs-3.3.7/js/jquery-3.3.1.js"></script>
+<script src="/static/bs-3.3.7/js/bootstrap.js"></script>
+</html>

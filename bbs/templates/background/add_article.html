@@ -1,0 +1,64 @@
+{% extends 'background/backcontrol_base.html' %}
+
+{% block content %}
+    <h3 class="text-center" style="font-family: 微软雅黑;">添加文章</h3>
+    <form action="" href="" method="post" style="border: 2px solid #ababac; padding: 20px">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="titlt" class="control-label">标题</label>
+            <div>
+                <input id="title" name="title" type="text" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="content" class="control-label">内容(kindeditor)</label>
+            <div>
+                <textarea name="content" id="content" cols="30" rows="10"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="category_id" class="control-label">分组
+                <a href="">+新增分组+</a>
+            </label>
+            <div>
+                <select id="category_id" name="category_id" class="form-control">
+                    {% for category in category_list %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="tag_id" class="control-label">标签
+                <a href=" ">+新增标签+</a>
+            </label>
+            <div>
+                <select id="tag_id" name="tag_id" class="form-control" multiple>
+                    {% for tag in tag_list %}
+                        <option value="{{ tag.id }}">{{ tag.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div>
+            <input type="submit" class="btn btn-primary" value="提交">
+        </div>
+    </form>
+{% endblock %}
+
+{% block script %}
+    <script src="/static/kindeditor/kindeditor-all.js"></script>
+    <script>
+        KindEditor.ready(function (K) {
+            window.editor = K.create('#content', {
+                width: '100%',
+                height: '400px',
+                resizeType: 0,
+                uploadJson: '/add_picture/',
+                extraFileUploadParams: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                }
+            });
+        });
+    </script>
+{% endblock %}

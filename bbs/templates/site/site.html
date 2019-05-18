@@ -1,0 +1,88 @@
+{% extends 'site/site_base.html' %}
+
+
+{% block content %}
+    {% for article in current_page %}
+        <h4><a href="/{{ username }}/article/{{ article.id }}.html">{{ article.title }}</a></h4>
+        <ul class="media-list">
+            <li class="media">
+                <div class="media-left hidden">
+                    <a href="#">
+                        <img class="media-object" src="/media/{{ article.blog.user.avatar }}" alt=""
+                             width="60"
+                             height="60">
+                    </a>
+                </div>
+                <div class="media-body">
+                    {{ article.desc }}
+                </div>
+            </li>
+        </ul>
+        <div class="pull-right">
+                        <span><a
+                                href="/{{ article.blog.user.username }}/">{{ article.blog.user.username }}</a></span>
+            <span style="margin-left: 10px">发布于{{ article.create_time }}</span>
+            <span class="fa fa-commenting-o " aria-hidden="true"
+                  style="margin-left: 10px">评论({{ article.comment_num }})</span>
+            <span class="glyphicon glyphicon-thumbs-up"
+                  style="margin-left: 10px">点赞({{ article.up_num }})</span>
+        </div>
+        <br>
+        <hr>
+    {% endfor %}
+    <nav aria-label="Page navigation" style="text-align: center">
+        <ul class="pagination">
+            <!-- 上一页 -->
+            {% if current_page.has_previous %}
+                <li class="previous"><a href="?page={{ current_num|add:-1 }}">上一页</a></li>
+            {% else %}
+                <li class="previous disabled"><a href="#">上一页</a></li>
+            {% endif %}
+
+            {% if num_pages < 10 %}
+                {% for num in page_range %}
+                    {% if current_num == num %}
+                        <li class="active">
+                            {% else %}
+                        <li>
+                    {% endif %}
+                <a href="?page={{ num }}">{{ num }}</a></li>
+                {% endfor %}
+            {% else %}
+                {% if current_num == 1 %}
+                    <li class="active">
+                        {% else %}
+                    <li>
+                {% endif %}
+            <a href="?page=1">1</a></li>
+                <li><a href="javascript:void(0)">...</a></li>
+                <!-- 中间三页页码 -->
+                {% for num in page_range %}
+                    {% if current_num == num %}
+                        <li class="active">
+                            {% else %}
+                        <li>
+                    {% endif %}
+                <a href="?page={{ num }}">{{ num }}</a></li>
+                {% endfor %}
+                <li><a href="javascript:void(0)">...</a></li>
+                <!-- 最后一页页码 -->
+                {% if current_num == num_pages %}
+                    <li class="active">
+                        {% else %}
+                    <li>
+                {% endif %}
+            <a href="?page={{ num_pages }}">{{ num_pages }}</a></li>
+            {% endif %}
+            <li>
+                {% if current_num < num_pages %}
+                    <a href="?page={{ current_num|add:1 }}" aria-label="Next">
+                {% else %}
+                    <a href="javascript:void(0)" aria-label="Next">
+                {% endif %}
+                <span aria-hidden="true">下一页</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+{% endblock %}

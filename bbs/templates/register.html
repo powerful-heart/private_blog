@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册</title>
+    <link rel="stylesheet" href="/static/bs-3.3.7/css/bootstrap.css">
+    <script src="/static/bs-3.3.7/js/jquery-3.3.1.js"></script>
+    <style>
+        #myfile {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container col-md-offset-4 col-md-4">
+    <div class="panel-primary" style="margin: 10% 0;">
+        <h2 class="text-center" style="font-size: 30px; font-weight: bolder;color: #1b6d85;  margin: 20px 0">用户注册</h2>
+        <hr>
+        <div class="panel-body bg-info" style="border-bottom-left-radius: 10px;border-bottom-right-radius: 10px;">
+
+            <form id="myform" novalidate>
+                {% csrf_token %}
+                <div class="form-group" style="margin-left: 100px">
+                    <label for="myfile">头像
+                        <img src="/static/img/default.png" height="80" width="80" id="my_img" style="margin-left: 10px">
+                    </label>
+                    <input type="file" id="myfile" accept="imgage/*">
+                </div>
+                {% for item in my_form %}
+                    <p class="form-group">
+                        <label for="{{ item.auto_id }}">{{ item.label }}</label>
+                        {{ item }}<span class=" error pull-right" style="color: red"></span>
+                    </p>
+                {% endfor %}
+                <br>
+                <div class="form-group">
+                    <input id="id_submit" type="button" value="注册" href=""
+                           class="register btn btn-primary col-md-4 col-md-offset-4">
+                </div>
+                {#            <span style="color: red">{{ error_all.0 }}</span>#}
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    //要用到change事件
+    $("#myfile").change(function () {
+        //获取文件对象
+        var myfile = $("#myfile")[0].files[0]
+        //文件阅读器,生成一个阅读器对象
+        var filereader = new FileReader()
+        //把文件读入该对象
+        filereader.readAsDataURL(myfile)
+        filereader.onload = function () {
+            //filereader.result 文件内容, 把文件内容放在src属性上
+            $("#my_img").attr("src", filereader.result)
+        }
+    })
+
+    $("#id_submit").click(function () {
+        //ajax提交文件, 的通过formdata对象
+        formdata = new FormData()
+        //取到form表单
+        {#console.log($("#myform").serializeArray())#}
+        upload_data = $("#myform").serializeArray()
+        //jq的循环语法
+        $.each(upload_data, function (index, obj) {
+            formdata.append(obj.name, obj.value)
+        })
+
+        formdata.append('myfile', $("#myfile")[0].files[0])
+        console.log('表单',formdata)
+        $.ajax({
+            url: "/register/",
+            type: "post",
+            //上传文件(不需要解析Data和内容)
+            processData: false,
+            contentType: false,
+            data: formdata,
+            success: function (data) {
+                if (data.status == 1) {
+                    location.href = data.url
+                } else {
+                    console.log(data.msg)
+                    //清空错误信息
+                    $("span.error").text("")
+                    $("#form-group").removeClass("has-error")
+                    //循环错误信息
+                    $.each(data.msg, function (filed, obj) {
+                        console.log(filed)
+                        console.log(obj)
+
+                        var aa = '#id_' + filed
+                        {#alert(aa)#}
+                        $(aa).next().html(obj[0]).parent().addClass('has-error')
+                        if (filed == '__all__') {
+                            //当两次密码不一致时,在确认密码的span标签中渲染错误信息
+                            $("#id_re_password").next().html(obj[0])
+                        }
+                        //过三秒清除错误信息
+                        setTimeout(function () {
+                            $("span.error").text("")
+                            $(".form-group").removeClass('has-error')
+                            //清掉value的值
+
+                        }, 3000)
+                    })
+                }
+            }
+        })
+    })
+</script>
+</html>

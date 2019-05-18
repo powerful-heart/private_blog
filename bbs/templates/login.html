@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户登录</title>
+    <link rel="stylesheet" href="/static/bs-3.3.7/css/bootstrap.css">
+    <script src="/static/bs-3.3.7/js/jquery-3.3.1.js"></script>
+</head>
+<body>
+<div class="container col-md-offset-4 col-md-4">
+    <div class="panel-primary" style="margin: 10% 0;">
+        <h2 class="text-center" style="font-size: 30px; font-weight: bolder;color: #1b6d85; margin: 20px 0">用户登录</h2>
+        <hr>
+        <div class="panel-body bg-info" style="border-radius: 10px">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="">用户名:</label>
+                <input type="text" id="id_name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="">密码:</label>
+                <input type="password" id="id_pwd" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="id_code">验证码</label>
+                <div class="row">
+                    <div class="col-md-4">
+                        <input type="text" id="id_code" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <img src="/get_code/" width="240" height="30" id="id_imgcode">
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary col-md-8 col-md-offset-2" style="margin-top: 30px" id="id_login">登录
+            </button><span class="error" style="color: red;margin-left: 10px"></span>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    $("#id_imgcode").click(function () {
+        //改变图片路径, 重新请求,加载图片
+        var aa = $("#id_imgcode").attr('src')+"?"
+        $("#id_imgcode").attr("src", aa)
+    })
+
+    $("#id_login").click(function () {
+        next_url = {{ next_url }}
+        next = next_url? '?next='+next_url: '';
+        console.log(next)
+        $.ajax({
+            url:'/login/'+next,
+            type: 'post',
+            data:{
+                'username': $("#id_name").val(),
+                'password': $("#id_pwd").val(),
+                'auth_code': $("#id_code").val(),
+                'csrfmiddlewaretoken': $("[name='csrfmiddlewaretoken']").val()
+            },
+            success:function (data) {
+                console.log(data)
+                if (data.status==1){
+                    location.href=data.url
+                }else{
+                    $(".error").text(data.msg)
+                    setTimeout(function () {
+                        $(".error").text("")
+                    },3000)
+                }
+            }
+        })
+    })
+</script>
+</html>
