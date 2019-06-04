@@ -25,7 +25,8 @@ SECRET_KEY = 'zo^kmh-7&2#oe@j+4xn%#-p-%*7_wfbsfa8v#jbs7aj=cqky48'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ["120.77.180.162", "www.liusijun.fun"]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -55,7 +56,7 @@ ROOT_URLCONF = 'bbs.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
+        'DIRS': [os.path.join(BASE_DIR, 'views')]
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -79,9 +80,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'bbs1',
-        'HOST': '127.0.0.1',
+        'HOST': 'localhost',
         'USER': 'root',
-        'PASSWORD': '123456'
+        'PASSWORD': '123456',
+        "CONN_MAX_AGE": 9
     }
 }
 
